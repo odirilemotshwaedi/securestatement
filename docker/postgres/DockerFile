@@ -1,0 +1,5 @@
+FROM postgres:17-alpine
+
+ENV POSTGRES_DB=securestatement_db
+
+COPY init/ /docker-entrypoint-initdb.d/
