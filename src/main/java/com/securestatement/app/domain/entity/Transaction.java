@@ -59,18 +59,4 @@ public class Transaction {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", transactionId='" + transactionId + '\'' +
-                ", customerId='" + customerId + '\'' +
-                ", amount=" + amount +
-                ", currency='" + currency + '\'' +
-                ", location='" + location + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
-    }
-
 }

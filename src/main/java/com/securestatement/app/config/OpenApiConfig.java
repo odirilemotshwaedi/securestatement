@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.context.annotation.Configuration;
 
+//OpenAPI / Swagger UI metadata for demos.
+
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
@@ -15,4 +17,3 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 }
 
-//http://localhost:8080/swagger-ui.html.

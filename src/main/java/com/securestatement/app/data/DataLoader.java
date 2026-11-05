@@ -19,7 +19,7 @@ public class DataLoader implements CommandLineRunner {
         this.csvTransactionReader = csvTransactionReader;
         this.transactionRepository = transactionRepository;
     }
-
+    //
     @Override
     public void run(String... args) throws Exception {
         if (transactionRepository.count() == 0) {

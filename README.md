@@ -2,20 +2,72 @@
 
 SecureStatement is a Spring Boot API that generates PDF statements from customer transaction data. It stores statement metadata and transactions in PostgreSQL and returns time-limited JWT links for accessing statements.
 
+## Project structure
+
+```text
+securestatement/
+├── data/
+│   └── transaction.csv              # Sample transactions loaded on first startup
+├── docker/
+│   └── postgres/
+│       ├── DockerFile                # PostgreSQL image and initialization scripts
+│       └── init/
+│           └── 01-create-user.sql    # Creates the application database role
+├── src/
+│   └── main/
+│       ├── java/com/securestatement/app/
+│       │   ├── StatementApplication.java
+│       │   ├── api/
+│       │   │   ├── controller/       # HTTP endpoints
+│       │   │   └── dto/              # API request and response types
+│       │   ├── config/               # Database and OpenAPI configuration
+│       │   ├── data/                 # CSV reader and startup data loader
+│       │   ├── domain/
+│       │   │   ├── entity/           # JPA entities
+│       │   │   └── repository/       # Spring Data repositories
+│       │   ├── security/             # JWT token handling
+│       │   └── service/              # Statement generation logic
+│       └── resources/
+│           ├── application.properties
+│           └── db/migration/         # Flyway database migrations
+│   └── test/
+│       └── java/com/securestatement/app/service/
+│           └── StatementServiceTest.java
+├── Dockerfile                        # Builds and packages the Spring Boot app
+├── docker-compose.yml                # Runs the app and PostgreSQL
+├── pom.xml                           # Maven dependencies and build settings
+├── seed-data.sql                     # Optional SQL sample data
+└── README.md
+```
+
 ## Requirements
 
 - Docker Desktop with Docker Compose, or Java 25 and PostgreSQL 17 for local development
 - Docker Compose supplies a development-only `JWT_SECRET`; set your own secret when running outside Compose
 
-## Run with Docker Compose
+## Build and run with Docker Compose
 
 With Docker Desktop running, run this from the repository root:
+
+```sh
+docker compose build
+```
+
+This builds the application and PostgreSQL images. No Java or Maven installation is needed on the host.
+
+Start the application and database:
+
+```sh
+docker compose up
+```
+
+Or build and start in one command:
 
 ```sh
 docker compose up --build
 ```
 
-No Java or Maven installation is needed on the host. Compose builds the application image, starts PostgreSQL, waits for its health check, then starts the application. On first startup, the app loads the included `data/transaction.csv` into an empty transactions table. The API is available at <http://localhost:8080>.
+Compose starts PostgreSQL, waits for its health check, then starts the application. On first startup, the app loads the included `data/transaction.csv` into an empty transactions table. The API is available at <http://localhost:8080>.
 
 Compose uses development-only database credentials and a development-only JWT signing secret by default. Do not use these defaults in a deployed environment. To override the JWT secret, set `JWT_SECRET` in your shell before starting Compose.
 
@@ -35,7 +87,9 @@ Compose stores PostgreSQL data and generated statements in named volumes. Databa
 
 ## API
 
-Interactive API documentation is available at <http://localhost:8080/swagger-ui.html>; the OpenAPI document is at <http://localhost:8080/v3/api-docs>.
+Open the interactive Swagger UI at <http://localhost:8080/swagger-ui.html>.
+
+The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
@@ -85,8 +139,12 @@ $env:JWT_SECRET = [guid]::NewGuid().ToString() + [guid]::NewGuid().ToString()
 
 The database user must have permissions to apply Flyway migrations. The PostgreSQL role and schema setup used by the Compose image is in `docker/postgres/init/`.
 
-Run tests with:
+## Test
+
+With Java 25 installed, run the Maven test lifecycle from the repository root:
 
 ```powershell
 .\mvnw.cmd test
 ```
+
+The Maven wrapper downloads Maven if needed. Unit tests under `src/test` use mocked repositories and temporary files, so they do not require a running PostgreSQL instance.

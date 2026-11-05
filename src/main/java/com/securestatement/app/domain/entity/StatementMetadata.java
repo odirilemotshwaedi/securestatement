@@ -27,13 +27,30 @@ public class StatementMetadata {
     }
 
     // --- Getters and Setters ---
-    public Long getId() { return id; }
-    public String getCustomerId() { return customerId; }
-    public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getFilePath() { return filePath; }
-    public void setFilePath(String filePath) { this.filePath = filePath; }
+    public String getCustomerId() {
+        return customerId;
+    }
 
-    public LocalDateTime getGeneratedAt() { return generatedAt; }
-    public void setGeneratedAt(LocalDateTime generatedAt) { this.generatedAt = generatedAt; }
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getFilePath() {
+        return filePath; 
+    }
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public LocalDateTime getGeneratedAt() {
+        return generatedAt;
+    }
+
+    public void setGeneratedAt(LocalDateTime generatedAt) {
+        this.generatedAt = generatedAt;
+    }
 }

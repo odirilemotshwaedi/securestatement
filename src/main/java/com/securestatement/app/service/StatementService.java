@@ -31,6 +31,7 @@ public class StatementService {
     @Autowired 
     private StatementRepository statementRepository;
 
+    //Method generates and stores customer account statements as PDF files
     public StatementMetadata generateStatement(String customerId, LocalDate startDate, LocalDate endDate) throws IOException {
         if (customerId == null || customerId.isBlank()) {
             throw new IllegalArgumentException("Customer ID must not be blank.");
@@ -67,20 +68,57 @@ public class StatementService {
                     content.setFont(PDType1Font.HELVETICA_BOLD, 16);
                     content.beginText();
                     content.newLineAtOffset(50, 750);
-                    content.showText("Account Statement for Customer: " + customerId);
+                    content.showText("Account Statement");
                     content.endText();
 
+                    // Draw a line under the header
+                    content.moveTo(50, 745);
+                    content.lineTo(550, 745);
+                    content.stroke();
+
+                    //Column headers
+                    content.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                    content.beginText();
+                    content.newLineAtOffset(50, 720);
+                    content.showText("Date");
+                    content.newLineAtOffset(150, 0);
+                    content.showText("Location");
+                    content.newLineAtOffset(150, 0);
+                    content.showText("Currency");
+                    content.newLineAtOffset(80, 0);
+                    content.showText("Amount");
+                    content.endText();
+
+
                     content.setFont(PDType1Font.HELVETICA, 10);
-                    int y = 710;
+                    int y = 700;
+                    content.setFont(PDType1Font.HELVETICA, 10);
                     for (int i = startIndex; i < endIndex; i++) {
                         Transaction tx = transactions.get(i);
+
                         content.beginText();
                         content.newLineAtOffset(50, y);
-                        content.showText(tx.getTimestamp() + " | " + tx.getLocation() + " | "
-                                + tx.getCurrency() + " " + tx.getAmount());
+                        content.showText(tx.getTimestamp().toString());
                         content.endText();
+
+                        content.beginText();
+                        content.newLineAtOffset(200, y);
+                        content.showText(tx.getLocation());
+                        content.endText();
+
+                        content.beginText();
+                        content.newLineAtOffset(350, y);
+                        content.showText(tx.getCurrency());
+                        content.endText();
+
+                        content.beginText();
+                        content.newLineAtOffset(430, y);
+                        content.showText(tx.getAmount().toString());
+                        content.endText();
+
                         y -= 18;
                     }
+
 
                     if (pageIndex == pageCount - 1) {
                         content.setFont(PDType1Font.HELVETICA_BOLD, 12);

@@ -13,10 +13,9 @@ import java.util.List;
 import com.securestatement.app.domain.entity.Transaction;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class CsvTransactionReader {
-    
+
     private static final String EXPECTED_HEADER = "transaction_id,customer_id,amount,currency,location,timestamp";
     private static final int EXPECTED_COLUMN_COUNT = 6;
 
@@ -41,7 +40,7 @@ public class CsvTransactionReader {
                 errors.add("The CSV file is empty.");
                 return transactions;
             }
-        
+
             if(!EXPECTED_HEADER.equals(headerLine.trim())){
                 errors.add("Line " + lineNumber + ": unexpected header \"" + headerLine + "\".");
                 return transactions;

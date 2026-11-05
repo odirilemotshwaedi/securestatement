@@ -5,6 +5,6 @@ import java.time.Instant;
 public record StatementLinkResponse(
                 String customerId,
                 String statementId,
-                String downloadUrl,
+                String downloadToken,
                 Instant expiresAt
 ) {}

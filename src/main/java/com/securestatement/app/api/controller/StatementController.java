@@ -24,29 +24,30 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.securestatement.app.api.dto.StatementLinkResponse;
 import com.securestatement.app.api.dto.StatementRequest;
 import com.securestatement.app.domain.entity.StatementMetadata;
-import com.securestatement.app.domain.entity.Transaction;
 import com.securestatement.app.domain.repository.StatementRepository;
 import com.securestatement.app.domain.repository.TransactionRepository;
 import com.securestatement.app.security.TokenService;
 import com.securestatement.app.service.StatementService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/statements")
+@Tag(name = "Statements", description = "Generate and securely download account statements")
 public class StatementController {
-    
+
+    private static final int DOWNLOAD_TOKEN_EXPIRY_MINUTES = 10;
+
     private final StatementRepository statementRepo;
     private final StatementService statementService;
-    private final TransactionRepository transactionRepository;
 
     public StatementController(StatementRepository statementRepo, StatementService statementService,
             TransactionRepository transactionRepository) {
         this.statementRepo = statementRepo;
         this.statementService = statementService;
-        this.transactionRepository = transactionRepository;
     }
 
-    //Method to generate a time limited download link
+    //Method to generate a time limited secure download token
     @PostMapping("/generate/{customerId}")
     public ResponseEntity<StatementLinkResponse> generateStatement(
         @RequestBody StatementRequest request,
@@ -58,16 +59,17 @@ public class StatementController {
                     request.endDate()
             );
 
-            String token = TokenService.generateToken(customerId, metadata.getId(), 30); // Token valid for 30 minutes
-            String downloadUrl = "/statements/download?token=" + token;
+            //Generate a download token valid for 10 minutes
+            String token = TokenService.generateToken(customerId, metadata.getId(), DOWNLOAD_TOKEN_EXPIRY_MINUTES);
 
             StatementLinkResponse response = new StatementLinkResponse(
                 metadata.getCustomerId(),
                 metadata.getId().toString(), 
-                downloadUrl, 
-                Instant.now().plusSeconds(1800)); // 30 minutes expiry
+                token, 
+                Instant.now().plusSeconds(600)); // 10 minutes expiry
 
             return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (IOException e){
@@ -80,48 +82,9 @@ public class StatementController {
         }
     }
 
-    //This method validates the generated token, check the ownership of the statement and returns a secure download link
+    //Method provides secure, time-limited download links to customers
     @GetMapping("/download")
-    public ResponseEntity<StatementLinkResponse> downloadStatement(@RequestParam String token){
-        DecodedJWT jwt;
-        try {
-            jwt = TokenService.validateToken(token);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token.");
-        }
-
-        String customerId = jwt.getClaim("customerId").asString();
-        Long statementId = jwt.getClaim("statementId").asLong();
-
-        StatementMetadata statementMetadata = statementRepo.findById(statementId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statement not found"));
-
-        // Ownership check: token's customerId must match the statement's owner
-        if (!statementMetadata.getCustomerId().equalsIgnoreCase(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match customer record");
-        }
-
-        File filePath = new File(statementMetadata.getFilePath());
-        if (!filePath.exists() || !filePath.canRead()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or inaccessible");
-        }
-        // Relative URL so this works in every environment (local, staging, production)
-        String downloadUrl = "/statements/file?token=" + token;
-
-        // Build response object
-        StatementLinkResponse response = new StatementLinkResponse(
-                customerId,
-                statementId.toString(),
-                downloadUrl,
-                jwt.getExpiresAt().toInstant()
-        );
-
-    return ResponseEntity.ok(response);
-    }
-
-    //Method streams the statement as a PDF file back to the client
-    @GetMapping("/file")
-    public ResponseEntity<Resource> streamStatementFile(@RequestParam String token) {
+    public ResponseEntity<Resource> downloadStatemenent(@RequestParam String token) {
         DecodedJWT jwt;
         try {
             jwt = TokenService.validateToken(token);
@@ -139,7 +102,7 @@ public class StatementController {
         if (!statementMetadata.getCustomerId().equals(customerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match customer record");
         }
-
+        //
         File filePath = new File(statementMetadata.getFilePath());
         if (!filePath.exists() || !filePath.canRead()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or inaccessible");
@@ -152,11 +115,5 @@ public class StatementController {
                         ContentDisposition.attachment().filename(filePath.getName()).build().toString())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
-    }
-
-    //Test output
-    @GetMapping ("/")
-    public List<Transaction> Statement(){
-        return transactionRepository.findAll();
     }
 }
