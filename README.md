@@ -45,9 +45,21 @@ securestatement/
 - Docker Desktop with Docker Compose, or Java 25 and PostgreSQL 17 for local development
 - Docker Compose supplies a development-only `JWT_SECRET`; set your own secret when running outside Compose
 
-## Build and run with Docker Compose
+## Running the Project with Docker Compose
 
-After cloning or saving the project into your local machine, open the command prompt/terminal and navigate to the path where your project is stored then with Docker Desktop running, run this from the repository root:
+Clone the remote repository to your local machine:
+
+```bash
+git clone <repository-url>
+```
+
+Navigate into the cloned repository directory:
+
+```bash
+cd <repository-name>
+```
+
+Ensure Docker Desktop is running. then from the repository root, run:
 
 ```sh
 docker compose build
