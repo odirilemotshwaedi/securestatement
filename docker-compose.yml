@@ -1,16 +1,18 @@
 services:
-  db:
-    image: postgres:17-alpine
+  postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: DockerFile
     environment:
-      POSTGRES_DB: securestatement_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: securestatement_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U securestatement-api -d \"$$POSTGRES_DB\""]
       interval: 3s
       timeout: 3s
       retries: 5
@@ -23,18 +25,39 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
+      statement-storage-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
     volumes:
       - statement_files:/app/statements
+      # FORCE FEED CONFIGURATION FILE DIRECTLY INTO SPRING BOOT:
+      - ./src/main/resources/application.properties:/app/config/application.properties
+   
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/securestatement_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/securestatement_db
+      SPRING_DATASOURCE_USERNAME: securestatement-api
+      SPRING_DATASOURCE_PASSWORD: password
+
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/securestatement_db
+      SPRING_FLYWAY_USER: securestatement-api
+      SPRING_FLYWAY_PASSWORD: password
+
       STATEMENT_STORAGE_DIR: /app/statements
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-before-deployment}
+
+  statement-storage-init:
+    image: alpine:3.21
+    user: "0:0"
+    command: ["sh", "-c", "chown 10001:10001 /statements"]
+    volumes:
+      - statement_files:/statements
+    restart: "no"
 
 volumes:
   postgres_data:

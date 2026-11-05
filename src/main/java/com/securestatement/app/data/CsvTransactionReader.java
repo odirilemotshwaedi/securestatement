@@ -1,4 +1,4 @@
-package com.securestatement.app;
+package com.securestatement.app.data;
 
 import java.math.BigDecimal;
 import java.io.BufferedReader;
@@ -10,6 +10,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.securestatement.app.domain.entity.Transaction;
 import org.springframework.stereotype.Component;
 
 

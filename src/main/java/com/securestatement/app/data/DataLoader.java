@@ -1,5 +1,7 @@
-package com.securestatement.app;
+package com.securestatement.app.data;
 
+import com.securestatement.app.domain.entity.Transaction;
+import com.securestatement.app.domain.repository.TransactionRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

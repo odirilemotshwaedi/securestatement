@@ -1,5 +1,6 @@
 FROM postgres:17-alpine
 
-ENV POSTGRES_DB=securestatement_db
+ENV POSTGRES_DB=securestatement_db \
+    POSTGRES_PASSWORD=password
 
 COPY init/ /docker-entrypoint-initdb.d/

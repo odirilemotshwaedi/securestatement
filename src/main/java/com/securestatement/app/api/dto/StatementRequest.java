@@ -1,4 +1,4 @@
-package com.securestatement.app;
+package com.securestatement.app.api.dto;
 
 import java.time.LocalDate;
 

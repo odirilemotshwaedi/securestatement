@@ -1,4 +1,4 @@
-package com.securestatement.app;
+package com.securestatement.app.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;

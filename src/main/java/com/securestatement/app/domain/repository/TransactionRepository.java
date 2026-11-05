@@ -1,5 +1,6 @@
-package com.securestatement.app;
+package com.securestatement.app.domain.repository;
 
+import com.securestatement.app.domain.entity.Transaction;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -9,4 +10,3 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByCustomerIdIgnoreCaseAndTimestampBetween(
         String customerId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 }
-  

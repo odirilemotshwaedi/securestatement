@@ -1,4 +1,4 @@
-package com.securestatement.app;
+package com.securestatement.app.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

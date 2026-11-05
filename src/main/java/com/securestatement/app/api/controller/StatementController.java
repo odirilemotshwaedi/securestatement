@@ -1,8 +1,9 @@
-package com.securestatement.app;
+package com.securestatement.app.api.controller;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -20,6 +21,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.securestatement.app.api.dto.StatementLinkResponse;
+import com.securestatement.app.api.dto.StatementRequest;
+import com.securestatement.app.domain.entity.StatementMetadata;
+import com.securestatement.app.domain.entity.Transaction;
+import com.securestatement.app.domain.repository.StatementRepository;
+import com.securestatement.app.domain.repository.TransactionRepository;
+import com.securestatement.app.security.TokenService;
+import com.securestatement.app.service.StatementService;
 
 
 @RestController
@@ -28,12 +37,16 @@ public class StatementController {
     
     private final StatementRepository statementRepo;
     private final StatementService statementService;
+    private final TransactionRepository transactionRepository;
 
-    public StatementController(StatementRepository statementRepo, StatementService statementService) {
+    public StatementController(StatementRepository statementRepo, StatementService statementService,
+            TransactionRepository transactionRepository) {
         this.statementRepo = statementRepo;
         this.statementService = statementService;
+        this.transactionRepository = transactionRepository;
     }
 
+    //Method to generate a time limited download link
     @PostMapping("/generate/{customerId}")
     public ResponseEntity<StatementLinkResponse> generateStatement(
         @RequestBody StatementRequest request,
@@ -45,7 +58,6 @@ public class StatementController {
                     request.endDate()
             );
 
-            // metadata is already persisted by StatementService — no second save needed
             String token = TokenService.generateToken(customerId, metadata.getId(), 30); // Token valid for 30 minutes
             String downloadUrl = "/statements/download?token=" + token;
 
@@ -60,12 +72,15 @@ public class StatementController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (IOException e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate statement PDF.", e);
+        } catch (ExceptionInInitializerError e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Server configuration error: " + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()), e);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected server error: " + e.getMessage(), e);
         }
-}
+    }
 
-
+    //This method validates the generated token, check the ownership of the statement and returns a secure download link
     @GetMapping("/download")
     public ResponseEntity<StatementLinkResponse> downloadStatement(@RequestParam String token){
         DecodedJWT jwt;
@@ -104,6 +119,7 @@ public class StatementController {
     return ResponseEntity.ok(response);
     }
 
+    //Method streams the statement as a PDF file back to the client
     @GetMapping("/file")
     public ResponseEntity<Resource> streamStatementFile(@RequestParam String token) {
         DecodedJWT jwt;
@@ -119,7 +135,7 @@ public class StatementController {
         StatementMetadata statementMetadata = statementRepo.findById(statementId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statement not found"));
 
-        // 🔒 Security check: ensure token’s customerId matches metadata’s customerId
+        // Security check: ensure token’s customerId matches metadata’s customerId
         if (!statementMetadata.getCustomerId().equals(customerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match customer record");
         }
@@ -138,47 +154,9 @@ public class StatementController {
                 .body(resource);
     }
 
-    @GetMapping ("/metadata/{statementId}")
-    public ResponseEntity<StatementMetadata> getStatementMetadata(@PathVariable Long statementId, @RequestParam String token) {
-        DecodedJWT jwt;
-        try {
-            jwt = TokenService.validateToken(token);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token.");
-        }
-
-        String customerId = jwt.getClaim("customerId").asString();
-
-        StatementMetadata statementMetadata = statementRepo.findById(statementId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statement not found"));
-
-        // Ownership check: token's customerId must match the statement's owner
-        if (!statementMetadata.getCustomerId().equalsIgnoreCase(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match customer record");
-        }
-
-        return ResponseEntity.ok(statementMetadata);
-    }
-
-    @GetMapping ("/metadata")
-    public ResponseEntity<Iterable<StatementMetadata>> getAllStatementsMetadata(@RequestParam String token) {
-        DecodedJWT jwt;
-        try {
-            jwt = TokenService.validateToken(token);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token.");
-        }
-
-        String customerId = jwt.getClaim("customerId").asString();
-
-        Iterable<StatementMetadata> statementsMetadata = statementRepo.findByCustomerId(customerId);
-
-        return ResponseEntity.ok(statementsMetadata);
-    }
-
+    //Test output
     @GetMapping ("/")
-    public String Statement(){
-
-        return "Hello, this is the statement endpoint. Use /generate/{customerId} to generate a statement, /download?token=your_token to download a statement, and /metadata/{statementId}?token=your_token to get metadata."; 
+    public List<Transaction> Statement(){
+        return transactionRepository.findAll();
     }
 }
