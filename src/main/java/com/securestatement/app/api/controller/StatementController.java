@@ -3,7 +3,6 @@ package com.securestatement.app.api.controller;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -115,5 +114,44 @@ public class StatementController {
                         ContentDisposition.attachment().filename(filePath.getName()).build().toString())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
+    }
+
+    //This method validates the generated token, Validate a token and return the PDF file URL
+    @GetMapping("/downloadLink")
+    public ResponseEntity<StatementLinkResponse> downloadLink(@RequestParam String token){
+        DecodedJWT jwt;
+        try {
+            jwt = TokenService.validateToken(token);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token.");
+        }
+
+        String customerId = jwt.getClaim("customerId").asString();
+        Long statementId = jwt.getClaim("statementId").asLong();
+
+        StatementMetadata statementMetadata = statementRepo.findById(statementId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statement not found"));
+
+        // Ownership check: token's customerId must match the statement's owner
+        if (!statementMetadata.getCustomerId().equalsIgnoreCase(customerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match customer record");
+        }
+
+        File filePath = new File(statementMetadata.getFilePath());
+        if (!filePath.exists() || !filePath.canRead()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or inaccessible");
+        }
+        // Relative URL so this works in every environment (local, staging, production)
+        String downloadUrl = "/statements/file?token=" + token;
+
+        // Build response object
+        StatementLinkResponse response = new StatementLinkResponse(
+                customerId,
+                statementId.toString(),
+                downloadUrl,
+                jwt.getExpiresAt().toInstant()
+        );
+        System.out.print(response);
+    return ResponseEntity.ok(response);
     }
 }

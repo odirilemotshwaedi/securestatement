@@ -26,9 +26,9 @@ public class StatementService {
     @Value("${statement.storage-dir}")
     private String storageDir;
 
-    @Autowired 
+    @Autowired
     private TransactionRepository transactionRepository;
-    @Autowired 
+    @Autowired
     private StatementRepository statementRepository;
 
     //Method generates and stores customer account statements as PDF files
@@ -68,7 +68,7 @@ public class StatementService {
                     content.setFont(PDType1Font.HELVETICA_BOLD, 16);
                     content.beginText();
                     content.newLineAtOffset(50, 750);
-                    content.showText("Account Statement");
+                    content.showText("Account Statement for Customer: " + customerId);
                     content.endText();
 
                     // Draw a line under the header
@@ -86,6 +86,7 @@ public class StatementService {
                     content.newLineAtOffset(150, 0);
                     content.showText("Currency");
                     content.newLineAtOffset(80, 0);
+
                     content.showText("Amount");
                     content.endText();
 
@@ -119,12 +120,11 @@ public class StatementService {
                         y -= 18;
                     }
 
-
                     if (pageIndex == pageCount - 1) {
                         content.setFont(PDType1Font.HELVETICA_BOLD, 12);
                         content.beginText();
                         content.newLineAtOffset(50, y - 20);
-                        content.showText("Total: " + total);
+                        content.showText("Total: R" + total);
                         content.endText();
                     }
                 }
@@ -140,7 +140,6 @@ public class StatementService {
 
         statementRepository.save(metadata);
 
-        return metadata; 
+        return metadata;
     }
 }
-

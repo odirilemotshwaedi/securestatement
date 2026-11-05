@@ -47,7 +47,7 @@ securestatement/
 
 ## Build and run with Docker Compose
 
-With Docker Desktop running, run this from the repository root:
+After cloning or saving the project into your local machine, open the command prompt/terminal and navigate to the path where your project is stored then with Docker Desktop running, run this from the repository root:
 
 ```sh
 docker compose build
@@ -93,7 +93,6 @@ The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/statements/` | Basic service response |
 | `POST` | `/statements/generate/{customerId}` | Generate a statement and return a temporary access link |
 | `GET` | `/statements/download?token={token}` | Validate a token and return the PDF file URL |
 | `GET` | `/statements/file?token={token}` | Download the PDF statement
