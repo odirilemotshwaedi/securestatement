@@ -50,7 +50,7 @@ securestatement/
 Clone the remote repository to your local machine:
 
 ```bash
-   git clone <repository-url>
+git clone <repository-url>
 ```
 
 Navigate into the cloned repository directory:
