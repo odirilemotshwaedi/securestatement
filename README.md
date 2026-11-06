@@ -117,7 +117,8 @@ curl.exe -X POST "http://localhost:8080/statements/generate/C101" `
   -d '{"startDate":"2026-10-01","endDate":"2026-10-31"}'
 ```
 
-```swagger-ui
+Generate statement using Swagger-ui
+```Swagger-ui
 To generate a token using the 'POST' method, Enter any customer id between 'C101 and C106' and to for example value on schema use these statement dates {"startDate":"2026-10-01","endDate":"2026-10-31"}. The generated token will be visible on the response body then you can use it to get the download link and store the statement.
 Alternatively navigate to the data directory to see the sample of transactions stored in the transaction.csv file.
 ```
