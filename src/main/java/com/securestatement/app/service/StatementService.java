@@ -124,7 +124,7 @@ public class StatementService {
                         content.setFont(PDType1Font.HELVETICA_BOLD, 12);
                         content.beginText();
                         content.newLineAtOffset(50, y - 20);
-                        content.showText("Total: R" + total);
+                        content.showText("Total: " + total);
                         content.endText();
                     }
                 }
