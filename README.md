@@ -45,21 +45,9 @@ securestatement/
 - Docker Desktop with Docker Compose, or Java 25 and PostgreSQL 17 for local development
 - Docker Compose supplies a development-only `JWT_SECRET`; set your own secret when running outside Compose
 
-## Running the Project with Docker Compose
+## Build and run with Docker Compose
 
-Clone the remote repository to your local machine:
-
-```bash
-git clone <repository-url>
-```
-
-Navigate into the cloned repository directory:
-
-```bash
-cd <repository-name>
-```
-
-Ensure Docker Desktop is running. then from the repository root, run:
+After cloning or saving the project into your local machine, open the command prompt/terminal and navigate to the path where your project is stored then with Docker Desktop running, run this from the repository root:
 
 ```sh
 docker compose build
@@ -99,7 +87,7 @@ Compose stores PostgreSQL data and generated statements in named volumes. Databa
 
 ## API
 
-Open the interactive Swagger UI at <http://localhost:8080/swagger-ui.html>.
+Open the interactive Swagger UI at <[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui/index.html)>.
 
 The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 

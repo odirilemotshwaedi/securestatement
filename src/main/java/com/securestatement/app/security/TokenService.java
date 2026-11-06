@@ -26,7 +26,7 @@ public class TokenService {
 
     // Generate a token with customerId, fileId, and expiry in minutes
     public static String generateToken(String customerId, Long statementId, int expiryMinutes) {
-        
+
         return JWT.create()
                 .withClaim("customerId", customerId)
                 .withClaim("statementId", statementId)
