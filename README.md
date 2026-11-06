@@ -106,9 +106,9 @@ The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/statements/generate/{customerId}` | Generate a statement and return a temporary access link |
-| `GET` | `/statements/download?token={token}` | Validate a token and return the PDF file URL |
-| `GET` | `/statements/file?token={token}` | Download the PDF statement
+| `POST` | `/statements/generate/{customerId}` | Generate a statement and return a temporary time limited access link |
+| `GET` | `/statements/download?token={token}` | Returns the download link to store the PDF statement to your local machine |
+| `GET` | `/statements/file?token={token}` | 
 
 Generate a statement by sending ISO-8601 dates in the JSON body:
 
