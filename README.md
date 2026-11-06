@@ -87,11 +87,7 @@ Compose stores PostgreSQL data and generated statements in named volumes. Databa
 
 ## API
 
-Open the interactive Swagger UI at <[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui/index.html)>.
-<<<<<<< HEAD
-=======
-
->>>>>>> d159949bfa9daa86888f8375769edefbc2c7e55b
+Open the interactive Swagger UI at <http://localhost:8080/swagger-ui.html>.
 
 The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 
