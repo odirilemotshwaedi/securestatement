@@ -88,14 +88,17 @@ Compose stores PostgreSQL data and generated statements in named volumes. Databa
 ## API
 
 Open the interactive Swagger UI at <[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui/index.html)>.
+<<<<<<< HEAD
+=======
+
+>>>>>>> d159949bfa9daa86888f8375769edefbc2c7e55b
 
 The OpenAPI specification is available at <http://localhost:8080/v3/api-docs>.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/statements/generate/{customerId}` | Generate a statement and return a temporary access link |
-| `GET` | `/statements/download?token={token}` | Validate a token and return the PDF file URL |
-| `GET` | `/statements/file?token={token}` | Download the PDF statement
+| `POST` | `/statements/generate/{customerId}` | Generate a statement and return a temporary time limited access link |
+| `GET` | `/statements/download?token={token}` | Returns the download link to store the PDF statement to your local machine |
 
 Generate a statement by sending ISO-8601 dates in the JSON body:
 
@@ -103,6 +106,12 @@ Generate a statement by sending ISO-8601 dates in the JSON body:
 curl.exe -X POST "http://localhost:8080/statements/generate/C101" `
   -H "Content-Type: application/json" `
   -d '{"startDate":"2026-10-01","endDate":"2026-10-31"}'
+```
+
+Generate statement using Swagger-ui
+```Swagger-ui
+To generate a token using the 'POST' method, Enter any customer id between 'C101 and C106' and to for example value on schema use these statement dates {"startDate":"2026-10-01","endDate":"2026-10-31"}. The generated token will be visible on the response body then you can use it to get the download link and store the statement.
+Alternatively navigate to the data directory to see the sample of transactions stored in the transaction.csv file.
 ```
 
 The response contains a tokenized download URL. Tokens expire after 30 minutes. Treat the tokenized URL as a secret and do not publish it.
